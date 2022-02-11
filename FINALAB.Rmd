@@ -1,0 +1,157 @@
+---
+title: "Untitled"
+author: "Farnadis_Kanja"
+date: "2/11/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Let's begin by loading the dependancies and their libraries
+```{r}
+install.packages("data.table") # install package data.table to work with data tables
+library("data.table")
+```
+
+```{r}
+install.packages("tidyverse") # install packages to work with data frame - extends into visualization
+library(tidyverse)
+```
+
+```{r}
+library(caret)
+```
+
+Let's load dataset and preview it
+```{r}
+supermarket <- fread('http://bit.ly/CarreFourDataset')
+head(supermarket)
+```
+Let's look at various properties of the dataset
+```{r}
+str(supermarket)
+```
+
+```{r}
+dim(supermarket)
+#1000 rows and 16 columns
+```
+
+```{r}
+class(supermarket)
+```
+Data Cleaning
+Lets check for null values
+```{r}
+sum(is.na(supermarket))
+#no null values
+```
+Let's look at duplicated values
+```{r}
+duplicated_rows <- supermarket[duplicated(supermarket),]
+duplicated_rows
+#no duplicated rows
+```
+Let's drop some columns- col id, date, time
+```{r}
+supermarket2= within(supermarket, rm("Invoice ID", "Date", "Time", "gross margin percentage"))
+```
+preview 
+```{r}
+head(supermarket2)
+```
+
+
+Select categorical variables
+
+```{r}
+#select categorical variables
+supa <- supermarket2[,c(1,2,3,4,8)]
+#non categorical
+market <- supermarket2[,c(5,6,7,9,10,11,12)]
+
+```
+encode supa
+```{r}
+dmy <- dummyVars(" ~ .", data = supa, fullRank = T)
+df <- data.frame(predict(dmy, newdata = supa))
+```
+join newly encoded plus market
+```{r}
+carrefour <- cbind(market,df)
+
+
+```
+Dimensionality Reduction- pca
+```{r}
+data_pca <- prcomp(carrefour, scale = F,
+                center = TRUE, retx = T)
+names(data_pca)
+```
+
+```{r}
+summary(data_pca)
+#there are 19 Principle components with the first explaining 99% of the total variance
+```
+Let's plot the pca
+```{r}
+library(devtools)
+install_github("vqv/ggbiplot", force = TRUE)
+```
+Load the ggbiplot library
+```{r}
+install.packages("grid")
+```
+
+```{r}
+library(ggbiplot)
+```
+
+```{r}
+ggbiplot(data_pca)
+```
+The first four variables seem to the most important although in reality, the first one seems to carry all the wieght. 
+Part 2- Feature Selection
+Let's see which attributes are highly correlated
+```{r}
+install.packages("corrplot")
+```
+```{r}
+library(corrplot)
+```
+
+```{r}
+correlationMatrix <- cor(carrefour)
+correlationMatrix
+corrplot(correlationMatrix)
+```
+Let's find attributes which are highly correlated
+```{r}
+highcorr <- findCorrelation(correlationMatrix, cutoff = 0.75)
+highcorr
+
+```
+Let's Remove highly correlated features
+```{r}
+carrefour2 <- carrefour[-highcorr]
+```
+Let's look at our graphs
+install corrplot
+```{r}
+install.packages("corrplot")
+```
+load library
+```{r}
+library(corrplot)
+```
+
+```{r}
+par(mfrow = c(1,2))
+corrplot(correlationMatrix, order = "hclust")
+corrplot(cor(carrefour2), order = "hclust")
+```
+
+`
+
+

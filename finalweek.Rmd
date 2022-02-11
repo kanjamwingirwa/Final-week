@@ -1,0 +1,88 @@
+---
+title: "FINAL_B"
+author: "Farnadis_Kanja"
+date: "2/11/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+install.packages("anomalize")
+```
+```{r}
+library(anomalize)
+```
+```{r}
+install.packages("tidyverse") # install packages to work with data frame - extends into visualization
+library(tidyverse)
+```
+
+```{r}
+install.packages("data.table") # install package data.table to work with data tables
+library("data.table")
+```
+
+```{r}
+datar = fread('http://bit.ly/CarreFourSalesDataset')
+head(datar)
+```
+Let's look at some of the properties of the data
+```{r}
+str(datar)
+dim(datar)
+class(datar)
+```
+
+```{r}
+datar = na.omit(datar)
+```
+
+Let's covert date to date-type
+```{r}
+datar$Date <- as.Date(datar$Date, '%m%d%y')
+```
+
+```{r}
+datar <- na.omit(datar)
+```
+
+
+```{r}
+datar$Date <-as.POSIXct.Date(datar$Date)
+```
+
+load libbletime
+```{r}
+install.packages("tibbletime")
+#library(tibbletime)
+```
+```{r}
+library(tibbletime)
+```
+
+change to class tibble
+```{r}
+data = as_tibble(datar)
+```
+
+remove all null values
+```{r}
+data <- na.omit(data)
+```
+check for null
+```{r}
+sum(is.na(data))
+```
+
+
+```{r}
+#data %>%
+#time_decompose(Sales, method = 'stl', frequency = 'auto', trend = 'auto') %>%
+#anomalize(remainder, method = 'gesd', alpha = 0.1, max_anoms = 0.6) %>%
+#plot_anomaly_decomposition(ncol = 3, alpha_dots = 0.7)
+
+```
+
